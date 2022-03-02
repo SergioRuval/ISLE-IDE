@@ -6,16 +6,20 @@ package editor;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JViewport;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -28,8 +32,8 @@ public class Editor extends javax.swing.JFrame {
      * Creates new form Editor
      */
     
-    private boolean archivo1Guardado;
     private HashMap<Integer ,Boolean> archivosGuardados;
+    private HashMap<Integer, File> archivosAbiertos;
     
     public Editor() {
         initComponents();
@@ -39,6 +43,8 @@ public class Editor extends javax.swing.JFrame {
         
         this.archivosGuardados = new HashMap<Integer, Boolean>();
         this.archivosGuardados.put( 0, false);
+        this.archivosAbiertos = new HashMap<Integer, File>();
+        this.archivosAbiertos.put(0,null);
     }
     
     /**
@@ -106,6 +112,12 @@ public class Editor extends javax.swing.JFrame {
         panelArbolArchivos.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         bg.add(panelArbolArchivos, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 190, 500));
+
+        panelCodigo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                panelCodigoMousePressed(evt);
+            }
+        });
 
         txtCodigo.setColumns(20);
         txtCodigo.setRows(5);
@@ -238,25 +250,66 @@ public class Editor extends javax.swing.JFrame {
         //ruta.setDialogTitle("Seleccionar carpeta");
         //ruta.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         
-        if(!this.archivosGuardados.get(this.panelCodigo.getSelectedIndex())){
+        if(!this.archivosGuardados.get(this.panelCodigo.getSelectedIndex()) 
+                && this.archivosAbiertos.get(this.panelCodigo.getSelectedIndex()) == null ){
             int valor = ruta.showSaveDialog(null);
         
             if(valor == JFileChooser.APPROVE_OPTION){
                 
                 File nuevoArchivo = ruta.getSelectedFile();
+                JScrollPane selectedPanel = (JScrollPane)this.panelCodigo.getSelectedComponent();
+                JViewport viewport = (JViewport) selectedPanel.getViewport();
+                JTextArea selected = (JTextArea) viewport.getView();
+                
                 try{
-                    FileUtils.writeStringToFile(nuevoArchivo, this.txtCodigo.getText(), "UTF-8");
-                    this.panelCodigo.setTitleAt(0, nuevoArchivo.getName());
+                    FileUtils.writeStringToFile(nuevoArchivo, selected.getText(), "UTF-8");
+                    this.panelCodigo.setTitleAt(this.panelCodigo.getSelectedIndex(), nuevoArchivo.getName());
                     this.archivosGuardados.replace( this.panelCodigo.getSelectedIndex(), true);
+                    
                 }catch(IOException ex){
                     System.out.println(ex.getMessage());
                 }
             }
+        }else if( !this.archivosGuardados.get(this.panelCodigo.getSelectedIndex()) 
+                && this.archivosAbiertos.get(this.panelCodigo.getSelectedIndex()).getAbsolutePath() != "" ){
+            
+            File archivoExistente = this.archivosAbiertos.get(this.panelCodigo.getSelectedIndex());
+            JScrollPane selectedPanel = (JScrollPane)this.panelCodigo.getSelectedComponent();
+            JViewport viewport = (JViewport) selectedPanel.getViewport();
+            JTextArea selected = (JTextArea) viewport.getView();
+
+            try{
+                FileUtils.writeStringToFile(archivoExistente, selected.getText(), "UTF-8");
+                this.archivosGuardados.replace( this.panelCodigo.getSelectedIndex(), true);
+
+            }catch(IOException ex){
+                System.out.println(ex.getMessage());
+            }
+            
+            JOptionPane.showMessageDialog(rootPane, "El archivo ha sido guardado");
+        }else{
+            JOptionPane.showMessageDialog(rootPane, "El archivo ya ha sido guardado");
         }
     }//GEN-LAST:event_mnOpGuardarActionPerformed
 
     private void mnOpNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpNuevoActionPerformed
+        JFileChooser ruta = new JFileChooser();
         
+        int valor = ruta.showSaveDialog(null);
+        
+        if(valor == JFileChooser.APPROVE_OPTION){
+
+            File nuevoArchivo = ruta.getSelectedFile();
+            nuevaTab(nuevoArchivo.getName(), "");
+            try{
+                FileUtils.writeStringToFile(nuevoArchivo, "", "UTF-8");
+            }catch(IOException ex){
+                System.out.println(ex.getMessage());
+            }
+            this.archivosGuardados.put(this.panelCodigo.getTabCount() - 1, false);
+            this.panelCodigo.setSelectedIndex(this.panelCodigo.getTabCount() - 1);
+            this.archivosAbiertos.put(this.panelCodigo.getSelectedIndex(), nuevoArchivo);
+        }
     }//GEN-LAST:event_mnOpNuevoActionPerformed
 
     private void mnOpAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpAbrirActionPerformed
@@ -265,9 +318,10 @@ public class Editor extends javax.swing.JFrame {
         if(archivo != null){
             try {
                 //this.panelCodigo.addTab(archivo.getName(), null);
-                nuevaTab(archivo.getAbsolutePath(), FileUtils.readFileToString(archivo, "UTF-8"));
+                nuevaTab(archivo.getName(), FileUtils.readFileToString(archivo, "UTF-8"));
                 this.archivosGuardados.put(this.panelCodigo.getTabCount() - 1, true);
                 this.panelCodigo.setSelectedIndex(this.panelCodigo.getTabCount() - 1);
+                this.archivosAbiertos.put(this.panelCodigo.getSelectedIndex(), archivo);
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
             }
@@ -278,6 +332,37 @@ public class Editor extends javax.swing.JFrame {
         cerrarCaracter(evt.getKeyChar(), this.txtCodigo);
         this.archivosGuardados.replace( this.panelCodigo.getSelectedIndex(), false);
     }//GEN-LAST:event_txtCodigoKeyReleased
+
+    private void panelCodigoMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelCodigoMousePressed
+        int index = this.panelCodigo.getSelectedIndex();
+        
+        JPopupMenu popUp = new JPopupMenu();
+        JMenuItem borrar = new JMenuItem("Cerrar");
+        
+        borrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panelCodigo.remove(index);
+                if(archivosAbiertos.containsKey(index + 1)){
+                    archivosAbiertos.replace(index, archivosAbiertos.get(index + 1));
+                    archivosAbiertos.remove(index);
+                }else if(archivosAbiertos.size() - 1 == index){
+                    archivosAbiertos.remove(index);
+                }
+                
+                if(archivosGuardados.containsKey(index + 1)){
+                    archivosGuardados.replace(index, archivosGuardados.get(index + 1));
+                    archivosGuardados.remove(index);
+                }else if(archivosGuardados.size() - 1 == index){
+                    archivosGuardados.remove(index);
+                }
+            }
+            
+        });
+        
+        popUp.add(borrar);
+        popUp.show(this, evt.getX(), evt.getY());
+    }//GEN-LAST:event_panelCodigoMousePressed
     
     private void nuevaTab(String nombre, String cont){
         JTextArea contenido = nuevoTxtArea();
