@@ -5,6 +5,8 @@
 package editor;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import java.awt.Font;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -17,8 +19,11 @@ public class Editor extends javax.swing.JFrame {
      */
     public Editor() {
         initComponents();
+        
+        this.txtCodigo.setTabSize(4);
+        this.txtCodigo.setFont(new Font("Consolas", Font.PLAIN, 14));
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -29,21 +34,27 @@ public class Editor extends javax.swing.JFrame {
     private void initComponents() {
 
         bg = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
+        panelArbolArchivos = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTree1 = new javax.swing.JTree();
         jLabel1 = new javax.swing.JLabel();
         panelCodigo = new javax.swing.JTabbedPane();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        txtCodigo = new javax.swing.JTextArea();
+        panelFasesCompilacion = new javax.swing.JTabbedPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtLexico = new javax.swing.JTextArea();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        txtSintactico = new javax.swing.JTextArea();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        txtSemantico = new javax.swing.JTextArea();
+        jScrollPane8 = new javax.swing.JScrollPane();
+        txtCodigoIntermedio = new javax.swing.JTextArea();
+        panelOutput = new javax.swing.JTabbedPane();
         jScrollPane4 = new javax.swing.JScrollPane();
         txtErrores = new javax.swing.JTextArea();
         jScrollPane5 = new javax.swing.JScrollPane();
         txtResultados = new javax.swing.JTextArea();
-        jTabbedPane2 = new javax.swing.JTabbedPane();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnArchivo = new javax.swing.JMenu();
         mnOpNuevo = new javax.swing.JMenuItem();
@@ -67,46 +78,69 @@ public class Editor extends javax.swing.JFrame {
         bg.setMinimumSize(new java.awt.Dimension(1200, 700));
         bg.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelArbolArchivos.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jScrollPane1.setViewportView(jTree1);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 190, 470));
+        panelArbolArchivos.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 190, 470));
 
         jLabel1.setText("Proyectos");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+        panelArbolArchivos.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        bg.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 190, 500));
+        bg.add(panelArbolArchivos, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 190, 500));
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane3.setViewportView(jTextArea1);
+        txtCodigo.setColumns(20);
+        txtCodigo.setRows(5);
+        txtCodigo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtCodigoKeyReleased(evt);
+            }
+        });
+        jScrollPane3.setViewportView(txtCodigo);
 
         panelCodigo.addTab("tab1", jScrollPane3);
 
         bg.add(panelCodigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 0, 630, 500));
 
+        txtLexico.setColumns(20);
+        txtLexico.setRows(5);
+        jScrollPane2.setViewportView(txtLexico);
+
+        panelFasesCompilacion.addTab("Lexico", jScrollPane2);
+
+        txtSintactico.setColumns(20);
+        txtSintactico.setRows(5);
+        jScrollPane6.setViewportView(txtSintactico);
+
+        panelFasesCompilacion.addTab("Sintáctico", jScrollPane6);
+
+        txtSemantico.setColumns(20);
+        txtSemantico.setRows(5);
+        jScrollPane7.setViewportView(txtSemantico);
+
+        panelFasesCompilacion.addTab("Semántico", jScrollPane7);
+
+        txtCodigoIntermedio.setColumns(20);
+        txtCodigoIntermedio.setRows(5);
+        jScrollPane8.setViewportView(txtCodigoIntermedio);
+
+        panelFasesCompilacion.addTab("Código Intermedio", jScrollPane8);
+
+        bg.add(panelFasesCompilacion, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 0, 340, 500));
+
         txtErrores.setColumns(20);
         txtErrores.setRows(5);
         jScrollPane4.setViewportView(txtErrores);
 
-        jTabbedPane1.addTab("Errores", jScrollPane4);
+        panelOutput.addTab("Errores", jScrollPane4);
 
         txtResultados.setColumns(20);
         txtResultados.setRows(5);
         jScrollPane5.setViewportView(txtResultados);
 
-        jTabbedPane1.addTab("Resultados", jScrollPane5);
+        panelOutput.addTab("Resultados", jScrollPane5);
 
-        bg.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 510, 1180, 180));
-
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jScrollPane2.setViewportView(jTextArea2);
-
-        jTabbedPane2.addTab("tab1", jScrollPane2);
-
-        bg.add(jTabbedPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 0, 340, 500));
+        bg.add(panelOutput, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 510, 1180, 180));
 
         mnArchivo.setText("Archivo");
 
@@ -122,6 +156,11 @@ public class Editor extends javax.swing.JFrame {
 
         mnOpGuardar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mnOpGuardar.setText("Guardar");
+        mnOpGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnOpGuardarActionPerformed(evt);
+            }
+        });
         mnArchivo.add(mnOpGuardar);
 
         mnOpGuardarTodo.setText("Guardar todo");
@@ -164,6 +203,27 @@ public class Editor extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void mnOpGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpGuardarActionPerformed
+        if(!this.txtCodigo.getText().isBlank()){
+            this.txtResultados.setText(this.txtCodigo.getText());
+        }
+    }//GEN-LAST:event_mnOpGuardarActionPerformed
+
+    private void txtCodigoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyReleased
+        cerrarCaracter(evt.getKeyChar());
+    }//GEN-LAST:event_txtCodigoKeyReleased
+    
+    private void cerrarCaracter(char caracter){
+        if(caracter == 40 | caracter == 91 | caracter == 123 ){
+            int ascii = caracter + 1 * (caracter%2 + 1);
+            this.txtCodigo.insert(String.valueOf((char) ascii), this.txtCodigo.getCaretPosition());
+            this.txtCodigo.setCaretPosition(this.txtCodigo.getCaretPosition() - 1);
+        }else if( caracter == 34 | caracter == 39 ){
+            this.txtCodigo.insert(String.valueOf(caracter), this.txtCodigo.getCaretPosition());
+            this.txtCodigo.setCaretPosition(this.txtCodigo.getCaretPosition() - 1);
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -182,19 +242,17 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JPanel bg;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
+    private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextArea jTextArea2;
     private javax.swing.JTree jTree1;
     private javax.swing.JMenu mnArchivo;
     private javax.swing.JMenu mnAyuda;
@@ -207,8 +265,16 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JMenuItem mnOpGuardarTodo;
     private javax.swing.JMenuItem mnOpNuevo;
     private javax.swing.JMenuItem mnOpSalir;
+    private javax.swing.JPanel panelArbolArchivos;
     private javax.swing.JTabbedPane panelCodigo;
+    private javax.swing.JTabbedPane panelFasesCompilacion;
+    private javax.swing.JTabbedPane panelOutput;
+    private javax.swing.JTextArea txtCodigo;
+    private javax.swing.JTextArea txtCodigoIntermedio;
     private javax.swing.JTextArea txtErrores;
+    private javax.swing.JTextArea txtLexico;
     private javax.swing.JTextArea txtResultados;
+    private javax.swing.JTextArea txtSemantico;
+    private javax.swing.JTextArea txtSintactico;
     // End of variables declaration//GEN-END:variables
 }
