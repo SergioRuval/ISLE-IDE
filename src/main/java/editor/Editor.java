@@ -6,7 +6,17 @@ package editor;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -17,11 +27,18 @@ public class Editor extends javax.swing.JFrame {
     /**
      * Creates new form Editor
      */
+    
+    private boolean archivo1Guardado;
+    private HashMap<Integer ,Boolean> archivosGuardados;
+    
     public Editor() {
         initComponents();
         
         this.txtCodigo.setTabSize(4);
         this.txtCodigo.setFont(new Font("Consolas", Font.PLAIN, 14));
+        
+        this.archivosGuardados = new HashMap<Integer, Boolean>();
+        this.archivosGuardados.put( 0, false);
     }
     
     /**
@@ -33,6 +50,7 @@ public class Editor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane9 = new javax.swing.JScrollPane();
         bg = new javax.swing.JPanel();
         panelArbolArchivos = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -72,7 +90,7 @@ public class Editor extends javax.swing.JFrame {
         mnAyuda = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("IDE");
+        setTitle("IDE - ISLE IDE 1.0");
         setMinimumSize(new java.awt.Dimension(1200, 700));
 
         bg.setMinimumSize(new java.awt.Dimension(1200, 700));
@@ -98,7 +116,7 @@ public class Editor extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(txtCodigo);
 
-        panelCodigo.addTab("tab1", jScrollPane3);
+        panelCodigo.addTab("Archivo", jScrollPane3);
 
         bg.add(panelCodigo, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 0, 630, 500));
 
@@ -142,15 +160,27 @@ public class Editor extends javax.swing.JFrame {
 
         bg.add(panelOutput, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 510, 1180, 180));
 
+        jScrollPane9.setViewportView(bg);
+
         mnArchivo.setText("Archivo");
 
         mnOpNuevo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mnOpNuevo.setText("Nuevo");
+        mnOpNuevo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnOpNuevoActionPerformed(evt);
+            }
+        });
         mnArchivo.add(mnOpNuevo);
         mnArchivo.add(jSeparator2);
 
         mnOpAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mnOpAbrir.setText("Abrir");
+        mnOpAbrir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnOpAbrirActionPerformed(evt);
+            }
+        });
         mnArchivo.add(mnOpAbrir);
         mnArchivo.add(jSeparator3);
 
@@ -193,35 +223,111 @@ public class Editor extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(bg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane9, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(bg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane9, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void mnOpGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpGuardarActionPerformed
-        if(!this.txtCodigo.getText().isBlank()){
-            this.txtResultados.setText(this.txtCodigo.getText());
+        JFileChooser ruta = new JFileChooser();
+        //ruta.setDialogTitle("Seleccionar carpeta");
+        //ruta.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        
+        if(!this.archivosGuardados.get(this.panelCodigo.getSelectedIndex())){
+            int valor = ruta.showSaveDialog(null);
+        
+            if(valor == JFileChooser.APPROVE_OPTION){
+                
+                File nuevoArchivo = ruta.getSelectedFile();
+                try{
+                    FileUtils.writeStringToFile(nuevoArchivo, this.txtCodigo.getText(), "UTF-8");
+                    this.panelCodigo.setTitleAt(0, nuevoArchivo.getName());
+                    this.archivosGuardados.replace( this.panelCodigo.getSelectedIndex(), true);
+                }catch(IOException ex){
+                    System.out.println(ex.getMessage());
+                }
+            }
         }
     }//GEN-LAST:event_mnOpGuardarActionPerformed
 
+    private void mnOpNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpNuevoActionPerformed
+        
+    }//GEN-LAST:event_mnOpNuevoActionPerformed
+
+    private void mnOpAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnOpAbrirActionPerformed
+        File archivo = seleccionarArchivo();
+        
+        if(archivo != null){
+            try {
+                //this.panelCodigo.addTab(archivo.getName(), null);
+                nuevaTab(archivo.getAbsolutePath(), FileUtils.readFileToString(archivo, "UTF-8"));
+                this.archivosGuardados.put(this.panelCodigo.getTabCount() - 1, true);
+                this.panelCodigo.setSelectedIndex(this.panelCodigo.getTabCount() - 1);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }//GEN-LAST:event_mnOpAbrirActionPerformed
+
     private void txtCodigoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyReleased
-        cerrarCaracter(evt.getKeyChar());
+        cerrarCaracter(evt.getKeyChar(), this.txtCodigo);
+        this.archivosGuardados.replace( this.panelCodigo.getSelectedIndex(), false);
     }//GEN-LAST:event_txtCodigoKeyReleased
     
-    private void cerrarCaracter(char caracter){
+    private void nuevaTab(String nombre, String cont){
+        JTextArea contenido = nuevoTxtArea();
+        JScrollPane panel = new JScrollPane();
+                
+        contenido.addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyReleased(KeyEvent evt){
+                cerrarCaracter(evt.getKeyChar(), contenido);
+                archivosGuardados.replace( panelCodigo.getSelectedIndex(), false);
+            }
+        });
+        
+        panel.setViewportView(contenido);
+        contenido.setText(cont);
+        
+        
+        
+        this.panelCodigo.addTab(nombre, panel);
+    }
+    
+    private File seleccionarArchivo(){
+        JFileChooser selector = new JFileChooser();
+        int valor = selector.showOpenDialog(null);
+        
+        if(valor == JFileChooser.APPROVE_OPTION){
+            return selector.getSelectedFile();
+        }else{
+            return null;
+        }
+    }
+    
+    private void cerrarCaracter(char caracter, JTextArea txt){
         if(caracter == 40 | caracter == 91 | caracter == 123 ){
             int ascii = caracter + 1 * (caracter%2 + 1);
-            this.txtCodigo.insert(String.valueOf((char) ascii), this.txtCodigo.getCaretPosition());
-            this.txtCodigo.setCaretPosition(this.txtCodigo.getCaretPosition() - 1);
+            txt.insert(String.valueOf((char) ascii), txt.getCaretPosition());
+            txt.setCaretPosition(txt.getCaretPosition() - 1);
         }else if( caracter == 34 | caracter == 39 ){
-            this.txtCodigo.insert(String.valueOf(caracter), this.txtCodigo.getCaretPosition());
-            this.txtCodigo.setCaretPosition(this.txtCodigo.getCaretPosition() - 1);
+            txt.insert(String.valueOf(caracter), txt.getCaretPosition());
+            txt.setCaretPosition(txt.getCaretPosition() - 1);
         }
+    }
+    
+    private JTextArea nuevoTxtArea(){
+        JTextArea nuevo = new JTextArea();
+        
+        nuevo.setTabSize(4);
+        nuevo.setFont(new Font("Consolas", Font.PLAIN, 14));
+        
+        return nuevo;
     }
     
     /**
@@ -250,6 +356,7 @@ public class Editor extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
